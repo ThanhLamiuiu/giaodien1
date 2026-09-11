@@ -1,0 +1,25 @@
+{
+  "name": "room-allocation-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prototype thuần HTML/CSS/JS kiểm thử thuật toán phân bổ phòng học. Mở room-allocation/index.html để chạy. Next.js chỉ là lớp vỏ để v0 preview.",
+  "scripts": {
+    "sync": "node scripts/sync-static.mjs",
+    "predev": "node scripts/sync-static.mjs",
+    "prebuild": "node scripts/sync-static.mjs",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype phân bổ phòng học</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <p class="eyebrow">Room allocation · Best-fit · No time shifting</p>
+        <h1>PROTOTYPE PHÂN BỔ PHÒNG HỌC</h1>
+        <p class="lead">
+          Phân phòng dựa trên thời khóa biểu đã có sẵn. Thuật toán <strong>không</strong> đổi Thứ,
+          <strong>không</strong> đổi Tiết; chỉ tìm phòng phù hợp theo chiến lược Best Fit, sau đó thử ghép lớp
+          cùng học phần, cuối cùng đánh dấu &ldquo;Đề xuất hủy&rdquo; nếu bất khả thi.
+        </p>
+      </div>
+
+      <div class="controls">
+        <label class="field">
+          <span>Bộ dữ liệu</span>
+          <select id="datasetSelect" aria-label="Chọn bộ dữ liệu"></select>
+        </label>
+        <label class="field checkbox">
+          <input type="checkbox" id="debugToggle" checked />
+          <span>Debug log ra console</span>
+        </label>
+        <div class="button-row">
+          <button id="runBtn" class="btn btn-primary" type="button">Chạy thuật toán</button>
+          <button id="resetBtn" class="btn" type="button">Reset</button>
+          <button id="testBtn" class="btn btn-ghost" type="button">Chạy test case</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- ===================== THỐNG KÊ ===================== -->
+    <section class="section" aria-labelledby="statsTitle">
+      <h2 id="statsTitle">Thống kê</h2>
+      <div id="stats" class="stats"></div>
+    </section>
+
+    <!-- ===================== DATASET MẪU ===================== -->
+    <section class="section" aria-labelledby="datasetTitle">
+      <div class="section-head">
+        <h2 id="datasetTitle">Dataset mẫu</h2>
+        <p id="datasetDesc" class="muted"></p>
+      </div>
+      <details class="panel" open>
+        <summary>Danh sách phòng <span id="roomCountBadge" class="badge"></span></summary>
+        <div id="roomList" class="room-list"></div>
+      </details>
+      <details class="panel">
+        <summary>Thời khóa biểu đầu vào <span id="classCountBadge" class="badge"></span></summary>
+        <div class="table-wrap">
+          <table class="data-table" id="inputTable">
+            <thead>
+              <tr>
+                <th>Mã</th><th>Lớp</th><th>Học phần</th><th>Thứ</th><th>Tiết</th><th>SV</th><th>Loại phòng</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+
+    <!-- ===================== KẾT QUẢ PHÂN PHÒNG ===================== -->
+    <section class="section" aria-labelledby="resultTitle">
+      <div class="section-head">
+        <h2 id="resultTitle">Kết quả phân phòng</h2>
+        <p class="muted">Lọc theo Thứ và theo trạng thái để kiểm tra từng nhóm lớp.</p>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group" role="group" aria-label="Lọc theo thứ" id="dayFilter"></div>
+        <div class="filter-group" role="group" aria-label="Lọc theo trạng thái" id="statusFilter"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="resultTable">
+          <thead>
+            <tr>
+              <th>Lớp</th><th>Học phần</th><th>Thứ</th><th>Tiết</th><th>SV</th>
+              <th>Phòng</th><th>Sức chứa</th><th>Trạng thái</th><th>Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="resultEmpty" class="empty">Chưa chạy thuật toán. Nhấn &ldquo;Chạy thuật toán&rdquo; để bắt đầu.</p>
+    </section>
+
+    <!-- ===================== LỊCH SỬ SỬ DỤNG PHÒNG ===================== -->
+    <section class="section" aria-labelledby="historyTitle">
+      <div class="section-head">
+        <h2 id="historyTitle">Lịch sử sử dụng phòng</h2>
+        <p class="muted">Mỗi dòng là một khung giờ phòng bị chiếm. Hai dòng cùng phòng, cùng Thứ, tiết giao nhau = lỗi.</p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="historyTable">
+          <thead>
+            <tr><th>Phòng</th><th>Sức chứa</th><th>Thứ</th><th>Tiết</th><th>Lớp</th><th>Học phần</th><th>SV</th><th>Lấp đầy</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="historyEmpty" class="empty">Chưa có dữ liệu.</p>
+    </section>
+
+    <!-- ===================== INVARIANT ===================== -->
+    <section class="section" aria-labelledby="invTitle">
+      <div class="section-head">
+        <h2 id="invTitle">Kiểm tra tính đúng đắn (invariant)</h2>
+        <p class="muted">Tự động chạy sau mỗi lần phân phòng.</p>
+      </div>
+      <ul id="invariantList" class="check-list"></ul>
+    </section>
+
+    <!-- ===================== TEST CASE ===================== -->
+    <section class="section" aria-labelledby="testTitle">
+      <div class="section-head">
+        <h2 id="testTitle">Test case (Best Fit, trùng lịch, ghép lớp, đề xuất hủy)</h2>
+        <p class="muted">Các test case nhỏ, độc lập với dataset đang chọn.</p>
+      </div>
+      <ul id="testList" class="check-list"><li class="muted">Nhấn &ldquo;Chạy test case&rdquo;.</li></ul>
+    </section>
+
+    <!-- ===================== LOG ===================== -->
+    <section class="section" aria-labelledby="logTitle">
+      <div class="section-head">
+        <h2 id="logTitle">Log thuật toán</h2>
+        <p class="muted">Nội dung giống với console.log (mở DevTools để xem thêm).</p>
+      </div>
+      <pre id="logOutput" class="log" aria-live="polite"></pre>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
